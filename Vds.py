@@ -80,18 +80,25 @@ def start(message):
     u = message.from_user
     uid = u.id
 
-    sql.execute("SELECT * FROM users WHERE user_id=?", (uid,))
-    if not sql.fetchone():
-        sql.execute("INSERT INTO users (user_id,name) VALUES (?,?)", (uid, u.first_name))
-        db.commit()
+    # Her işlem için geçici bir bağlantı oluşturmak en güvenli yoldur
+    with sqlite3.connect("data.db") as conn:
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM users WHERE user_id=?", (uid,))
+        if not cursor.fetchone():
+            cursor.execute("INSERT INTO users (user_id,name) VALUES (?,?)", (uid, u.first_name))
+            conn.commit()
 
-    sql.execute("SELECT premium,banned FROM users WHERE user_id=?", (uid,))
-    premium, banned = sql.fetchone()
+        cursor.execute("SELECT premium, banned FROM users WHERE user_id=?", (uid,))
+        row = cursor.fetchone()
+        
+    if row:
+        premium, banned = row
+        if banned:
+            bot.send_message(uid, "🚫 Hesabınız yasaklandı.")
+            return
 
-    if banned:
-        bot.send_message(uid, "🚫 Hesabınız yasaklandı.")
-        return
-
+    # Menü ve mesaj gönderimi kısımları aynı kalabilir...
     photos = bot.get_user_profile_photos(uid, limit=1)
     if photos.total_count:
         bot.send_photo(uid, photos.photos[0][0].file_id)

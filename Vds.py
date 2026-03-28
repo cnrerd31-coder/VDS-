@@ -5,6 +5,7 @@ import subprocess
 import sys
 import os
 import threading
+import importlib
 
 TOKEN = "8668348358:AAF1T_Mqo8ZKJguRAoNSESndB8EGqcyxVFs"
 ADMIN_ID = 7250471858
@@ -270,12 +271,17 @@ def mod_prompt(message):
     bot.register_next_step_handler(msg, mod_install)
 
 def mod_install(message):
+    module_name = message.text.strip()
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", message.text])
-        bot.send_message(message.chat.id, "✅ Modül yüklendi.")
+        # Modülü yükle
+        subprocess.check_call([sys.executable, "-m", "pip", "install", module_name])
+        
+        # Kritik Adım: Yüklenen modülü çalışma anında koda tanıt
+        importlib.invalidate_caches() 
+        
+        bot.send_message(message.chat.id, f"✅ {module_name} yüklendi ve sisteme tanıtıldı.")
     except Exception as e:
         bot.send_message(message.chat.id, f"❌ Hata:\n{e}")
-
 # ================= DOSYA YÜKLE =================
 @bot.message_handler(func=lambda m: m.text == "📂 Dosya Yükle")
 def upload_prompt(message):

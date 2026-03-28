@@ -36,11 +36,13 @@ CREATE TABLE IF NOT EXISTS bots (
 """)
 
 # Sonra status sütunu kontrolü YAPILDI
-sql.execute("PRAGMA table_info(bots)")
-columns = [info[1] for info in sql.fetchall()]
-if "status" not in columns:
-    sql.execute("ALTER TABLE bots ADD COLUMN status TEXT DEFAULT 'pending'")
+# HATA VEREN ESKİ YÖNTEM:
+# sql.execute("SELECT...") 
 
+# DOĞRU YÖNTEM (Her işlemde yeni bağlantı):
+with sqlite3.connect("data.db") as conn:
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE user_id=?", (uid,))
 db.commit()
 
 running_processes = {}

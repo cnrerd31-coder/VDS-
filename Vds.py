@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS bots (
 # DOĞRU YÖNTEM (Her işlemde yeni bağlantı):
 with sqlite3.connect("data.db") as conn:
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE user_id=?", (uid,))
+    cursor.execute("SELECT * FROM users WHERE user_id=?", (id,))
 db.commit()
 
 running_processes = {}
